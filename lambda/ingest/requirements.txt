@@ -1,0 +1,4 @@
+# psycopg2 is provided via the shared Lambda layer (see lambda/layers/psycopg2)
+# rather than bundled per-function, since it must be compiled for the
+# Lambda Linux runtime. Nothing else beyond boto3 (built into the runtime)
+# is required.

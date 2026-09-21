@@ -1,0 +1,56 @@
+version: "3.9"
+
+networks:
+  localnet:
+    name: geo-ingest-localnet
+
+services:
+  postgis:
+    image: postgis/postgis:16-3.4
+    container_name: local-postgis
+    networks:
+      - localnet
+    environment:
+      POSTGRES_USER: geoadmin
+      POSTGRES_PASSWORD: localdevpassword
+      POSTGRES_DB: geodata
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/init-postgis.sql:/docker-entrypoint-initdb.d/init-postgis.sql
+      - postgis_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geoadmin -d geodata"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  localstack:
+    image: localstack/localstack:3.5
+    container_name: local-localstack
+    networks:
+      - localnet
+    environment:
+      SERVICES: s3,lambda,apigateway,iam,sts,secretsmanager,sqs,events,logs,cloudwatch,sns
+      DEFAULT_REGION: us-east-1
+      LAMBDA_DOCKER_NETWORK: geo-ingest-localnet
+      DOCKER_HOST: unix:///var/run/docker.sock
+      # Lambda containers reach postgis by service/DNS name on localnet,
+      # the same way they'd reach an RDS endpoint by hostname in AWS.
+    ports:
+      - "4566:4566"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - localstack_data:/var/lib/localstack
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      postgis:
+        condition: service_healthy
+
+volumes:
+  postgis_data:
+  localstack_data:

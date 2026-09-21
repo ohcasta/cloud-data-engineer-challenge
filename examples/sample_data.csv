@@ -1,0 +1,9 @@
+id,latitude,longitude,category,value
+1,40.7128,-74.0060,temperature,21.5
+2,40.7138,-74.0055,temperature,22.1
+3,40.7150,-74.0040,temperature,21.8
+4,34.0522,-118.2437,humidity,55.0
+5,34.0500,-118.2500,humidity,58.2
+6,34.0540,-118.2480,humidity,56.7
+7,51.5074,-0.1278,temperature,15.3
+8,51.5090,-0.1300,temperature,14.9
